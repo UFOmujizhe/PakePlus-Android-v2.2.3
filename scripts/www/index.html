@@ -1,11 +1,662 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>PakePlus</title>
-    </head>
-    <body>
-        PakePlus
-    </body>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>计量助手 V3.92</title>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            overflow: hidden;
+            width: 95%;
+            max-width: 1050px; 
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #4169e1 0%, #5a67d8 100%);
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 75px;
+        }
+
+        .logo-wrapper {
+            width: 65px;
+            height: 65px; 
+            flex-shrink: 0; 
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+
+        .card-title { 
+            margin:0; 
+            font-size:20px; 
+            font-weight:700; 
+            text-shadow:0 2px 4px rgba(0,0,0,0.2);
+            text-align: center;
+            flex-grow: 1; 
+        }
+
+        .header-spacer {
+            width: 65px; 
+            height: 1px;
+            flex-shrink: 0;
+        }
+
+        .card-content { padding:12px; overflow-y: auto; }
+
+        .table-container { 
+            width:100%; 
+            border-radius:6px; 
+            box-shadow:0 2px 6px rgba(0,0,0,0.05);
+            overflow-x: auto;
+            margin-bottom: 0; 
+        }
+
+        table { width:100%; border-collapse:separate; border-spacing:0; height: 100%; }
+        
+        th, td { 
+            border:1px solid #e2e8f0; 
+            padding: 12px 4px; 
+            text-align:center; 
+            font-size:14px;
+            vertical-align: top;
+            line-height: 1.4;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #4169e1 0%, #5a67d8 100%);
+            color:white; font-weight:600;
+            vertical-align: middle;
+            white-space: nowrap; 
+        }
+        
+        td:first-child {
+            font-weight:600; background-color:#f7fafc; text-align:center;
+            color:#2d3748; width:80px; min-width:80px; font-size:13px;
+            vertical-align: middle;
+        }
+
+        input {
+            width:100%; padding:6px 2px; box-sizing:border-box; font-size:14px; text-align: center;
+            border:2px solid #e2e8f0; border-radius:4px; background-color: transparent;
+            font-family: inherit; color: #2d3748;
+        }
+        input:focus, select:focus { outline:none; border-color:#4169e1; background-color: #fff; }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .error-row { background-color:#fff5f5; }
+        .error-row td:first-child { background-color:#fed7d7; color:#c53030; }
+        
+        .readonly { 
+            background-color:#edf2f7; cursor: default; color: #718096; font-weight:700; 
+            border: 1px dashed #cbd5e0; pointer-events: none; user-select: none; -webkit-user-select: none;
+        }
+
+        .pure-flow-input {
+            text-align: left !important;
+            padding-left: 6px !important; 
+        }
+
+        .controls-wrapper {
+            margin-bottom: 15px; text-align: center; border-bottom: 1px solid #eee; padding-bottom: 15px;
+        }
+        .controls { display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom: 8px;}
+        
+        button {
+            color:white; border:none; padding:8px 16px; border-radius:6px;
+            cursor:pointer; font-size:13px; font-weight:600; 
+            box-shadow:0 3px 5px rgba(0,0,0,0.2); display:inline-flex; align-items:center; gap:5px;
+            height: 34px;
+        }
+        .clear-button { background:linear-gradient(135deg,#f56565 0%,#e53e3e 100%); }
+        .save-button { background:linear-gradient(135deg,#48bb78 0%,#38a169 100%); }
+        /* 新增：手动计算按钮样式（橙色系） */
+        .calc-button { background:linear-gradient(135deg,#ed8936 0%,#dd6b20 100%); }
+
+        .inline-input-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #edf2f7;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            padding: 2px 10px;
+            height: 34px;
+        }
+        .inline-input-group label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0;
+            white-space: nowrap;
+        }
+        .inline-input {
+            width: 75px;
+            padding: 2px 4px;
+            border: 1px solid #a0aec0;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #1a202c;
+            background-color: #fff;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        select.inline-input {
+            width: auto;
+            min-width: 90px;
+            cursor: pointer;
+            padding-right: 0px;
+        }
+
+        .info-bar {
+            display: flex; justify-content: space-between; font-size: 12px; color: #718096; padding: 0 10px; margin-top: 5px;
+        }
+        .time-badge { background: #edf2f7; padding: 2px 8px; border-radius: 4px; }
+
+        .creator-watermark {
+            text-align: center;
+            font-size: 11px;
+            color: #a0aec0;
+            margin-top: 15px;
+            letter-spacing: 1px;
+        }
+
+        .status-message {
+            position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-100px);
+            padding:10px 20px; border-radius:20px; color:white; font-weight:600; z-index:9999;
+            transition:all 0.4s; opacity: 0;
+        }
+        .status-message.show { transform:translateX(-50%) translateY(0); opacity: 1; }
+        .status-message.success { background:#48bb78; }
+        .status-message.info { background:#4299e1; }
+        .status-message.error { background:#e53e3e; }
+
+        .rotate-container {
+            width: 100%; height: 100vh; overflow-y: auto;
+            display: flex; justify-content: center; align-items: flex-start; padding-top: 20px;
+        }
+
+        /* 手机端自适应 */
+        @media screen and (max-width: 768px) {
+            body { overflow: hidden; }
+            .rotate-container {
+                position: fixed; top: 0; left: 0; 
+                width: 100vh; height: 100vw;
+                transform-origin: top left; 
+                transform: rotate(90deg) translateY(-100%);
+                padding: 0; 
+                background: #f7fafc; 
+                z-index: 100;
+                overflow: hidden;
+            }
+            .card { 
+                width: 100%; height: 100%; max-width: none; max-height: none; 
+                margin: 0; border-radius: 0; box-shadow: none;
+                display: flex; flex-direction: column;
+            }
+            
+            .card-header { min-height: 50px; padding: 5px 10px; }
+            .logo-wrapper { width: 45px; height: 45px; }
+            .header-spacer { width: 45px; }
+            .card-title { font-size: 18px; }
+            
+            .card-content { 
+                padding: 6px; flex: 1; display: flex; flex-direction: column; overflow: hidden; 
+            }
+            .controls-wrapper { 
+                margin-bottom: 6px; padding-bottom: 6px; 
+            }
+            .controls { gap: 6px; }
+            button { padding: 4px 8px; font-size: 12px; height: 28px; }
+            .inline-input-group { height: 28px; padding: 2px 6px; gap: 4px;}
+            .inline-input-group label { font-size: 12px; }
+            .inline-input { width: 50px; padding: 2px; font-size: 12px; }
+            
+            select.inline-input { width: 75px; }
+
+            .info-bar { margin-top: 2px; }
+            
+            .table-container { 
+                flex: 1; margin: 0; box-shadow: none; overflow: hidden; 
+                display: flex; flex-direction: column; 
+                border: 1px solid #e2e8f0;
+            }
+            table { 
+                width: 100%; height: 100%; table-layout: fixed; margin: 0; 
+                border-collapse: collapse;
+            }
+            th, td { 
+                padding: 2px !important; font-size: 12px; vertical-align: middle; 
+                border: 1px solid #e2e8f0;
+            }
+            td:first-child { width: auto; min-width: 0; font-size: 11px; }
+            input { font-size: 12px; padding: 4px 0; border-width: 1px; }
+
+            .pure-flow-input { padding-left: 2px !important; }
+            
+            .creator-watermark { margin-top: 6px; font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="rotate-container">
+        <div class="card" id="mainCard">
+            <div class="card-header">
+                <div class="logo-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+                        <rect width="200" height="200" rx="30" fill="white"/>
+                        <path d="M25,98 A75,75 0 0,1 175,98 Z" fill="#E6332A"/>
+                        <text x="100" y="93" font-family="Arial, sans-serif" font-weight="900" font-size="58" text-anchor="middle" fill="#003D96" stroke="white" stroke-width="2" paint-order="stroke">HNE</text>
+                        <text x="100" y="125" font-family="sans-serif" font-weight="bold" font-size="24" text-anchor="middle" fill="#003D96">河南能源</text>
+                        <text x="100" y="140" font-family="Arial, sans-serif" font-size="11" text-anchor="middle" fill="#003D96" letter-spacing="1">HENAN ENERGY</text>
+                        <path d="M0,150 L200,150 L200,170 A30,30 0 0,1 170,200 L30,200 A30,30 0 0,1 0,170 Z" fill="#00338D"/>
+                        <text x="100" y="188" font-family="sans-serif" font-weight="bold" font-size="34" text-anchor="middle" fill="white" letter-spacing="4">车集煤矿</text>
+                    </svg>
+                </div>
+                
+                <h1 class="card-title">计量助手 V3.92</h1>
+                
+                <div class="header-spacer"></div>
+            </div>
+            
+            <div class="card-content">
+                <div class="controls-wrapper">
+                    <div class="controls">
+                        <button class="save-button" onclick="saveData()"><span>💾</span> 保存数据</button>
+                        <button class="save-button" onclick="loadData()"><span>📂</span> 加载历史</button>
+                        
+                        <div class="inline-input-group">
+                            <select id="calcMode" class="inline-input">
+                                <option value="normal" selected>正常模式</option>
+                                <option value="auto">自动计算</option>
+                            </select>
+                        </div>
+                        
+                        <div class="inline-input-group" id="group_global_k" style="display: none;">
+                            <label for="global_k">孔板系数</label>
+                            <input type="number" step="any" id="global_k" class="inline-input">
+                        </div>
+                        <div class="inline-input-group" id="group_global_h" style="display: none;">
+                            <label for="global_h">压差</label>
+                            <input type="number" step="any" id="global_h" class="inline-input">
+                        </div>
+                        
+                        <button class="clear-button" onclick="clearData()"><span>🗑️</span> 清空重置</button>
+                        <button class="calc-button" onclick="forceCalculate()"><span>🧮</span> 显示计算</button>
+                    </div>
+                    <div class="info-bar">
+                        <span id="lastActionInfo">等待操作...</span>
+                        <span id="autoSaveInfo"></span>
+                    </div>
+                </div>
+                
+                <div class="table-container" id="tableArea">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th style="width:10%">项目</th>
+                                <th style="width:18%">负压(KPa)</th>
+                                <th style="width:18%">浓度(%)</th>
+                                <th style="width:18%">温度(℃)</th>
+                                <th style="width:18%">混合流量</th>
+                                <th style="width:18%">纯流量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>自动计量</td>
+                                <td><input type="number" step="any" name="autoMeasure_negativePressure"></td>
+                                <td><input type="text" inputmode="decimal" name="autoMeasure_concentration"></td>
+                                <td><input type="number" step="any" name="autoMeasure_temperature"></td>
+                                <td><input type="number" step="any" name="autoMeasure_mixedFlow" min="0"></td>
+                                <td><input type="text" name="autoMeasure_pureFlow" readonly class="readonly pure-flow-input" tabindex="-1" placeholder="自动计算"></td>
+                            </tr>
+                            <tr>
+                                <td>人工测定</td>
+                                <td><input type="number" step="any" name="manualMeasure_negativePressure"></td>
+                                <td><input type="text" inputmode="decimal" name="manualMeasure_concentration"></td>
+                                <td><input type="number" step="any" name="manualMeasure_temperature"></td>
+                                <td><input type="number" step="any" name="manualMeasure_mixedFlow" min="0"></td>
+                                <td><input type="text" name="manualMeasure_pureFlow" readonly class="readonly pure-flow-input" tabindex="-1" placeholder="自动计算"></td>
+                            </tr>
+                            <tr class="error-row">
+                                <td>误差(%)</td>
+                                <td><input type="text" name="error_negativePressure" readonly class="readonly" tabindex="-1"></td>
+                                <td><input type="text" name="error_concentration" readonly class="readonly" tabindex="-1"></td>
+                                <td><input type="text" name="error_temperature" readonly class="readonly" tabindex="-1"></td>
+                                <td><input type="text" name="error_mixedFlow" readonly class="readonly" tabindex="-1"></td>
+                                <td><input type="text" name="error_pureFlow" readonly class="readonly pure-flow-input" tabindex="-1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="creator-watermark">© 2026 制作者：刘羽飞</div>
+
+            </div>
+        </div>
+    </div>
+    
+    <div id="statusMessage" class="status-message"></div>
+
+    <script>
+        // ==================== 工具函数 ====================
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // ==================== 主计算器类 ====================
+        class FlowCalculator {
+            constructor() {
+                this.inputs = {};
+                this.errorInputs = {};
+                this.globalInputs = {};
+                this.initializeElements();
+                this.addEventListeners();
+                this.toggleManualMixedFlowUI(); 
+                this.checkExistingSave();
+            }
+
+            initializeElements() {
+                const fields = ['negativePressure','concentration','temperature','mixedFlow','pureFlow'];
+                ['autoMeasure','manualMeasure'].forEach(prefix => {
+                    fields.forEach(f => {
+                        this.inputs[`${prefix}_${f}`] = document.querySelector(`[name="${prefix}_${f}"]`);
+                    });
+                });
+                fields.forEach(f => {
+                    this.errorInputs[`error_${f}`] = document.querySelector(`[name="error_${f}"]`);
+                });
+                
+                this.globalInputs.k = document.getElementById('global_k');
+                this.globalInputs.h = document.getElementById('global_h');
+                this.modeSelect = document.getElementById('calcMode');
+                
+                this.groupK = document.getElementById('group_global_k');
+                this.groupH = document.getElementById('group_global_h');
+            }
+
+            addEventListeners() {
+                // 优化：针对防爆手机老旧输入法，绑定多种触发事件防劫持
+                const triggerEvents = ['input', 'keyup', 'change', 'compositionend'];
+                
+                const concInputs = [this.inputs.autoMeasure_concentration, this.inputs.manualMeasure_concentration];
+                concInputs.forEach(input => {
+                    triggerEvents.forEach(evt => {
+                        input.addEventListener(evt, (e) => {
+                            let val = e.target.value;
+                            if(val !== '' && !/^[0-9.]*$/.test(val)) e.target.value = val.replace(/[^0-9.]/g, '');
+                            this.updateCalculations();
+                        });
+                    });
+                    
+                    // blur 依然保留用于纠正极值
+                    input.addEventListener('blur', (e) => {
+                        let val = parseFloat(e.target.value);
+                        if (!isNaN(val)) {
+                            if (val < 0) val = 0;
+                            if (val > 100) val = 100;
+                            e.target.value = val; 
+                        }
+                        this.updateCalculations();
+                    });
+                });
+
+                Object.values(this.inputs).forEach(input => {
+                    if (input.name.includes('pureFlow') || input.name.includes('concentration')) return;
+                    triggerEvents.forEach(evt => {
+                        input.addEventListener(evt, debounce(() => this.updateCalculations(), 100));
+                    });
+                });
+
+                [this.globalInputs.k, this.globalInputs.h].forEach(input => {
+                    triggerEvents.forEach(evt => {
+                        input.addEventListener(evt, debounce(() => this.updateCalculations(), 100));
+                    });
+                });
+
+                this.modeSelect.addEventListener('change', () => {
+                    this.toggleManualMixedFlowUI();
+                    this.updateCalculations();
+                });
+            }
+
+            toggleManualMixedFlowUI() {
+                const mode = this.modeSelect.value;
+                const manualMixedInput = this.inputs.manualMeasure_mixedFlow;
+
+                if (mode === 'auto') {
+                    manualMixedInput.readOnly = true;
+                    manualMixedInput.classList.add('readonly');
+                    manualMixedInput.tabIndex = -1;
+                    manualMixedInput.type = "text"; 
+                    manualMixedInput.placeholder = "自动计算";
+                    
+                    this.groupK.style.display = 'inline-flex';
+                    this.groupH.style.display = 'inline-flex';
+                } else {
+                    manualMixedInput.readOnly = false;
+                    manualMixedInput.classList.remove('readonly');
+                    manualMixedInput.removeAttribute('tabindex');
+                    manualMixedInput.type = "number";
+                    manualMixedInput.placeholder = "";
+                    
+                    this.groupK.style.display = 'none';
+                    this.groupH.style.display = 'none';
+                }
+            }
+
+            calculateMixedFlow(concStr) {
+                const kStr = this.globalInputs.k.value;
+                const hStr = this.globalInputs.h.value;
+                
+                const k = parseFloat(kStr);
+                const h = parseFloat(hStr);
+                const c = parseFloat(concStr); 
+                
+                if (isNaN(k) || isNaN(h) || isNaN(c) || h < 0 || c < 0 || c > 100) return '';
+                
+                const rho_mix = 1.293 - 0.00577 * c;
+                if (rho_mix <= 0) return '';
+                
+                const factor = Math.sqrt(1.293 / rho_mix);
+                const q = k * Math.sqrt(h) * factor;
+                
+                return q.toFixed(4);
+            }
+
+            calculatePureFlow(concStr, flowStr) {
+                const conc = parseFloat(concStr);
+                const flow = parseFloat(flowStr);
+                if (isNaN(conc) || isNaN(flow) || flow < 0) return '';
+                return Math.abs((conc * flow) / 100).toFixed(4);
+            }
+
+            calculateError(auto, manual) {
+                const a = parseFloat(auto);
+                const m = parseFloat(manual);
+                
+                if (isNaN(a) || isNaN(m) || manual === '') return '';
+                if (m === 0) return a === 0 ? '0.00' : '无法计算';
+
+                const difference = Math.abs(a - m);
+                let result = (difference / m) * 100;
+                return Math.abs(result).toFixed(2);
+            }
+
+            updateCalculations() {
+                const mode = this.modeSelect.value;
+                
+                const autoMixed = this.inputs.autoMeasure_mixedFlow.value;
+                
+                let manualMixed;
+                if (mode === 'auto') {
+                    manualMixed = this.calculateMixedFlow(this.inputs.manualMeasure_concentration.value);
+                } else {
+                    manualMixed = this.inputs.manualMeasure_mixedFlow.value;
+                }
+
+                const autoPure = this.calculatePureFlow(this.inputs.autoMeasure_concentration.value, autoMixed);
+                const manualPure = this.calculatePureFlow(this.inputs.manualMeasure_concentration.value, manualMixed);
+
+                // 优化：利用 requestAnimationFrame 解决老旧手机 DOM 渲染卡顿、数值不更新的问题
+                requestAnimationFrame(() => {
+                    if (mode === 'auto') {
+                        this.inputs.manualMeasure_mixedFlow.value = manualMixed;
+                    }
+                    this.inputs.autoMeasure_pureFlow.value = autoPure;
+                    this.inputs.manualMeasure_pureFlow.value = manualPure;
+
+                    const fields = ['negativePressure','concentration','temperature','mixedFlow','pureFlow'];
+                    fields.forEach(f => {
+                        const autoVal = this.inputs[`autoMeasure_${f}`]?.value ?? '';
+                        const manVal = this.inputs[`manualMeasure_${f}`]?.value ?? '';
+                        this.errorInputs[`error_${f}`].value = this.calculateError(autoVal, manVal);
+                    });
+                });
+            }
+
+            // 新增：手动强制计算方法
+            forceCalculate() {
+                this.updateCalculations();
+                this.setInfo('已执行手动计算');
+                this.showMessage('计算已更新', 'info');
+            }
+
+            clearData() {
+                if(confirm('确定要清空所有内容吗？')) {
+                    Object.values(this.inputs).forEach(i => { 
+                        if (!i.readOnly || (i.name === 'manualMeasure_mixedFlow' && this.modeSelect.value === 'auto')) {
+                            i.value = ''; 
+                        }
+                    });
+                    Object.values(this.errorInputs).forEach(i => i.value = '');
+                    Object.values(this.globalInputs).forEach(i => i.value = '');
+                    this.updateCalculations();
+                    this.setInfo('数据已清空', true);
+                }
+            }
+
+            saveData() {
+                try {
+                    const now = new Date();
+                    const data = { timestamp: now.getTime(), values: {} };
+                    Object.keys(this.inputs).forEach(k => {
+                        data.values[k] = this.inputs[k].value;
+                    });
+                    data.values['global_k'] = this.globalInputs.k.value;
+                    data.values['global_h'] = this.globalInputs.h.value;
+                    data.values['calc_mode'] = this.modeSelect.value;
+                    
+                    localStorage.setItem('FlowCalc_v3.92', JSON.stringify(data));
+                    this.showMessage('保存成功', 'success');
+                    this.updateSaveLabel(now.getTime());
+                    this.setInfo('已手动保存');
+                } catch(e) {
+                    this.showMessage('保存失败', 'info');
+                }
+            }
+
+            loadData() {
+                try {
+                    const json = localStorage.getItem('FlowCalc_v3.92');
+                    if (!json) {
+                        this.showMessage('没有找到存档', 'info');
+                        return;
+                    }
+                    const data = JSON.parse(json);
+                    const savedTime = new Date(data.timestamp).toLocaleString();
+                    if(confirm(`检测到历史存档！\n\n存档时间：${savedTime}\n\n点击【确定】将覆盖当前屏幕上的数据。`)) {
+                        const values = data.values || data;
+                        
+                        if (values['calc_mode']) {
+                            this.modeSelect.value = values['calc_mode'];
+                            this.toggleManualMixedFlowUI();
+                        }
+
+                        Object.keys(values).forEach(k => {
+                            if (this.inputs[k]) this.inputs[k].value = values[k];
+                        });
+                        
+                        if (values['global_k'] !== undefined) this.globalInputs.k.value = values['global_k'];
+                        if (values['global_h'] !== undefined) this.globalInputs.h.value = values['global_h'];
+                        
+                        this.updateCalculations();
+                        this.showMessage('加载成功', 'success');
+                        this.updateSaveLabel(data.timestamp);
+                        this.setInfo(`已加载 ${savedTime} 的数据`);
+                    }
+                } catch(e) {
+                    this.showMessage('读取存档出错', 'info');
+                }
+            }
+
+            checkExistingSave() {
+                const json = localStorage.getItem('FlowCalc_v3.92');
+                if (json) {
+                    try {
+                        const data = JSON.parse(json);
+                        if(data.timestamp) this.updateSaveLabel(data.timestamp);
+                    } catch(e) {}
+                }
+            }
+
+            updateSaveLabel(timestamp) {
+                if(!timestamp) return;
+                const timeStr = new Date(timestamp).toLocaleString('zh-CN', {month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit'});
+                document.getElementById('autoSaveInfo').innerHTML = `📅 存档: <span class="time-badge">${timeStr}</span>`;
+            }
+
+            setInfo(text, isAlert=false) {
+                const el = document.getElementById('lastActionInfo');
+                el.textContent = text;
+                el.style.color = isAlert ? '#e53e3e' : '#718096';
+            }
+
+            showMessage(text, type) {
+                const el = document.getElementById('statusMessage');
+                el.textContent = text;
+                el.className = `status-message ${type} show`;
+                setTimeout(() => el.classList.remove('show'), 3500);
+            }
+        }
+
+        let calculator;
+        document.addEventListener('DOMContentLoaded', () => {
+            calculator = new FlowCalculator();
+        });
+
+        function saveData()    { calculator.saveData(); }
+        function loadData()    { calculator.loadData(); }
+        function clearData()   { calculator.clearData(); }
+        // 暴露全局强制计算函数
+        function forceCalculate() { calculator.forceCalculate(); }
+    </script>
+</body>
 </html>
